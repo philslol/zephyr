@@ -36,9 +36,9 @@ enum net_verdict net_packet_socket_input(struct net_pkt *pkt, uint8_t proto)
 #endif
 
 	#if defined (CONFIG_NET_VLAN)
-	uint16_t vlan_tag = pkt->vlan_tci;
-	struct net_if *iface = net_eth_get_vlan_iface(net_if_get_by_iface(pkt), vlan_tag);
-	net_pkt_set_iface(pkt, iface);
+	uint16_t vlan_tag = pkt->vlan_tci;		
+	struct net_if *vlan_iface = net_eth_get_vlan_iface(net_pkt_iface(pkt), vlan_tag);
+	net_pkt_set_iface(pkt, vlan_iface);
 	#endif /* CONFIG_NET_VLAN */
 
 	orig_family = net_pkt_family(pkt);
