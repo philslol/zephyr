@@ -35,17 +35,23 @@ enum net_verdict net_packet_socket_input(struct net_pkt *pkt, uint8_t proto)
 	}
 #endif
 
-	#if defined (CONFIG_NET_VLAN)
-	uint16_t vlan_tag = pkt->vlan_tci;		
+	// #if defined (CONFIG_NET_VLAN)
+	uint16_t vlan_tag = net_pkt_vlan_tag(pkt);
 	struct net_if *vlan_iface = net_eth_get_vlan_iface(net_pkt_iface(pkt), vlan_tag);
+	if (vlan_iface == NULL) {
+		LOG_INF("ERR: Received frame with wrong tag");
+		return NET_DROP;
+	}
+	struct net_if *old_iface = net_pkt_iface(pkt);
 	net_pkt_set_iface(pkt, vlan_iface);
-	#endif /* CONFIG_NET_VLAN */
+	// #endif /* CONFIG_NET_VLAN */
 
 	orig_family = net_pkt_family(pkt);
 
 	net_pkt_set_family(pkt, AF_PACKET);
 
 	net_verdict = net_conn_input(pkt, NULL, proto, NULL);
+	net_pkt_set_iface(pkt, old_iface);
 
 	net_pkt_set_family(pkt, orig_family);
 
